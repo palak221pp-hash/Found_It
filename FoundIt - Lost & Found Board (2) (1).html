@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FoundIt - Lost &amp; Found Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#e9eef4;--card:#fff;--ink:#14213d;--mut:#5b6679;--line:#d3dbe6;--lost:#e4572e;--lostbg:#fde7e0;--found:#0b8f6a;--foundbg:#d8f3ea;--btn:#14213d;--btnfg:#fff;--bad:#b42318}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1624;--card:#18223a;--ink:#e8edf6;--mut:#9aa6bd;--line:#2a3652;--lost:#ff8a65;--lostbg:#3a2220;--found:#3ddc9f;--foundbg:#143a30;--btn:#e8edf6;--btnfg:#14213d;--bad:#ff8a80}}
+:root[data-theme="dark"]{--bg:#0f1624;--card:#18223a;--ink:#e8edf6;--mut:#9aa6bd;--line:#2a3652;--lost:#ff8a65;--lostbg:#3a2220;--found:#3ddc9f;--foundbg:#143a30;--btn:#e8edf6;--btnfg:#14213d;--bad:#ff8a80}
+html[data-theme="dark"]{color-scheme:dark}
+:root[data-theme="dark"] .btn.lost,:root[data-theme="dark"] .btn.found{color:#0f1624}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Instrument Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;margin:0;line-height:1.1}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.logo span{color:var(--found)}
+.sub{color:var(--mut);margin:6px 0 0;max-width:46ch}
+button,select,input,textarea{font:inherit;color:inherit}
+.btn{background:var(--btn);color:var(--btnfg);border:0;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer}
+.btn.lost{background:var(--lost);color:#fff}.btn.found{background:var(--found);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 12px;font-size:14px}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.tag:focus-visible,.tab:focus-visible{outline:3px solid var(--found);outline-offset:2px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 14px}
+.tabs{display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:14px}
+.tab{background:none;border:0;padding:10px 14px;cursor:pointer;color:var(--mut);font-weight:600;border-bottom:3px solid transparent;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--ink)}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:18px}
+@media(max-width:600px){.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/3}}
+input,select,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.tag{position:relative;background:var(--card);border:1px solid var(--line);border-radius:6px 6px 14px 14px;padding:0 0 14px;cursor:pointer;overflow:hidden;text-align:left;width:100%;display:block}
+.tag .strip{height:30px;display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 40px;font-weight:700;font-size:14px}
+.tag.lost .strip{background:var(--lostbg);color:var(--lost)}.tag.found .strip{background:var(--foundbg);color:var(--found)}
+.tag .hole{position:absolute;left:12px;top:8px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:1px solid var(--line)}
+.tag img{width:100%;height:140px;object-fit:cover;display:block}
+.tag .ph{height:140px;display:grid;place-items:center;color:var(--mut);background:var(--bg);font-size:34px}
+.tag .b{padding:10px 12px 0}
+.tag h3{font-size:19px;margin-bottom:4px}
+.meta{color:var(--mut);font-size:14px}
+.pill{display:inline-block;border-radius:99px;padding:2px 10px;font-size:13px;font-weight:600;background:var(--bg);border:1px solid var(--line)}
+.pill.match{background:var(--foundbg);color:var(--found);border-color:transparent}
+.pill.warn{background:var(--lostbg);color:var(--lost);border-color:transparent}
+.empty{text-align:center;color:var(--mut);padding:40px 10px;border:1px dashed var(--line);border-radius:14px}
+.modal{position:fixed;inset:0;background:rgba(10,16,30,.6);display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:max(16px,env(safe-area-inset-top,0px)) 12px 24px;z-index:10}
+.modal.on{display:flex}
+.sheet{background:var(--card);border-radius:16px;width:100%;max-width:520px;padding:20px;margin:auto 0}
+.sheet h2{font-size:24px;margin-bottom:4px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.box{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px;background:var(--bg)}
+.hint{color:var(--mut);font-size:13px;margin:4px 0 0}
+.err{color:var(--bad);font-size:14px;margin-top:6px}
+.sheet .foot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.detail img{width:100%;max-height:260px;object-fit:cover;border-radius:12px;margin:10px 0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--btn);color:var(--btnfg);padding:10px 16px;border-radius:99px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.toast.on{opacity:1}
+.note{margin-top:28px;font-size:13px;color:var(--mut)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+@media(max-width:600px){.stats{grid-template-columns:1fr 1fr}}
+.st{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column}
+.st strong{font:800 22px "Bricolage Grotesque",system-ui,sans-serif}.st span{font-size:13px;color:var(--mut)}
+.pw{position:relative}.pw .cnt{position:absolute;right:8px;bottom:8px;background:rgba(10,16,30,.75);color:#fff;font-size:12px;padding:2px 8px;border-radius:99px}
+.pills{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.tag .ph{font-size:44px}
+.prev{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.prev img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+.thumbs{display:flex;gap:8px;margin-bottom:10px}.thumbs img{width:64px;height:64px;max-height:none;margin:0;cursor:pointer}
+a.btn{text-decoration:none;display:inline-block}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+:root[data-theme="dark"]{--bg:#0a0f1e;--card:#121a30;--line:#222d4b;--mut:#9aa7c2;--ink:#eef2fb}
+.wrap{max-width:1080px}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.navin{max-width:1080px;margin:0 auto;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font:800 22px "Bricolage Grotesque",system-ui,sans-serif;letter-spacing:-.02em}
+.brand span:last-child{color:var(--found)}
+.mark{width:34px;height:34px;border-radius:10px;background:var(--found);color:#0a0f1e;display:grid;place-items:center}
+.navr{display:flex;align-items:center;gap:6px}
+.nl{color:var(--mut);text-decoration:none;font-weight:600;padding:6px 10px;border-radius:8px}.nl:hover{color:var(--ink)}
+@media(max-width:640px){.nl{display:none}}
+.hero{max-width:1080px;margin:0 auto;padding:44px 16px 28px;display:grid;grid-template-columns:1.15fr .85fr;gap:36px;align-items:center}
+@media(max-width:820px){.hero{grid-template-columns:1fr;padding-top:28px}}
+.hero h1{font-size:clamp(36px,6vw,60px);font-weight:800;letter-spacing:-.03em;line-height:1.02}
+.hero p{color:var(--mut);font-size:18px;max-width:50ch;margin:16px 0 0}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px;align-items:center}
+.btn.lg{padding:13px 22px;font-size:16px;border-radius:12px}
+.hv{display:flex;flex-direction:column;align-items:center;gap:0;padding:8px}
+.vt{width:80%;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.vt b{display:block;font:700 18px "Bricolage Grotesque",system-ui,sans-serif;margin:6px 0 2px}.vt small{color:var(--mut)}
+.vs{font-size:12px;font-weight:700;border-radius:99px;padding:2px 10px}
+.vl{transform:rotate(-2.5deg);align-self:flex-start}.vl .vs{background:var(--lostbg);color:var(--lost)}
+.vf{transform:rotate(2deg);align-self:flex-end}.vf .vs{background:var(--foundbg);color:var(--found)}
+.vm{display:flex;flex-direction:column;align-items:center}
+.vm::before,.vm::after{content:"";height:22px;border-left:2px dashed var(--line)}
+.vm span{background:var(--found);color:#0a0f1e;font-weight:800;border-radius:99px;padding:6px 16px}
+.sec{max-width:1080px;margin:0 auto;padding:0 16px}
+.sh{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:44px 0 16px;flex-wrap:wrap}
+.sh h2{font-size:30px;letter-spacing:-.02em}.sh p{margin:0;color:var(--mut)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:700px){.steps{grid-template-columns:1fr}}
+.step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.step i{font:800 15px "Bricolage Grotesque",system-ui,sans-serif;font-style:normal;width:32px;height:32px;border-radius:50%;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;margin-bottom:12px}
+.step h3{font-size:20px;margin-bottom:6px}.step p{margin:0;color:var(--mut);font-size:15px}
+.stats{margin:0 auto 8px;max-width:1048px}
+.st{border-radius:14px}.st strong{font-size:26px}
+.tag{border-radius:18px}.tag:hover{border-color:var(--found)}
+.tag .strip{height:36px;font-size:13px}.tag h3{font-size:20px}
+.tag img,.tag .ph{height:150px}
+.foot2{max-width:1080px;margin:56px auto 0;padding:20px 16px 40px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--mut);font-size:14px}
+.adm{margin:0;display:flex;align-items:center;gap:8px;font-weight:500}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="navin">
+  <a class="brand" href="#top"><span class="mark"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></span><span>Found</span><span>It</span></a>
+  <div class="navr"><a class="nl" href="#board">Board</a><a class="nl" href="#how">How it works</a>
+    <button class="btn ghost sm" id="theme" type="button"></button>
+    <button class="btn found sm" data-post="found">I found something</button></div>
+</div></nav>
+
+<section class="hero" id="top">
+  <div>
+    <h1>Lost something on campus? Get it back faster.</h1>
+    <p>Post what you lost or found. FoundIt matches items by category, place, colour and date, and shares contact details only after the finder verifies the real owner.</p>
+    <div class="cta"><button class="btn lost lg" data-post="lost">I lost something</button><button class="btn ghost lg" data-post="found">I found something</button></div>
+  </div>
+  <div class="hv" aria-hidden="true">
+    <div class="vt vl"><span class="vs">Lost</span><b>Black earbuds case</b><small>Atrium &middot; Black &middot; Today</small></div>
+    <div class="vm"><span>94% match</span></div>
+    <div class="vt vf"><span class="vs">Found</span><b>Wireless earbuds case</b><small>Atrium &middot; Black &middot; Yesterday</small></div>
+  </div>
+</section>
+
+<div class="sec"><div class="stats" id="stats"></div></div>
+
+<div class="sec" id="how">
+  <div class="sh"><h2>How it works</h2></div>
+  <div class="steps">
+    <div class="step"><i>1</i><h3>Post it</h3><p>Add photos, category, location and colour. It takes under a minute.</p></div>
+    <div class="step"><i>2</i><h3>Get matched</h3><p>FoundIt scores every lost and found post against each other and shows likely matches.</p></div>
+    <div class="step"><i>3</i><h3>Verify and return</h3><p>The owner answers the finder's question. Once approved, contact details unlock.</p></div>
+  </div>
+</div>
+
+<div class="sec" id="board">
+  <div class="sh"><div><h2>The board</h2><p>Search by item, category or place.</p></div></div>
+  <div class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="all" aria-selected="true">All open</button>
+    <button class="tab" role="tab" data-tab="lost" aria-selected="false">Lost</button>
+    <button class="tab" role="tab" data-tab="found" aria-selected="false">Found</button>
+    <button class="tab" role="tab" data-tab="mine" aria-selected="false">My activity</button>
+    <button class="tab" role="tab" data-tab="done" aria-selected="false">Returned &amp; archived</button>
+  </div>
+  <div class="filters">
+    <input id="q" type="search" placeholder="Search items, e.g. black wallet" aria-label="Search">
+    <select id="fcat" aria-label="Category"></select>
+    <select id="floc" aria-label="Location"></select>
+  </div>
+  <div id="list" class="grid"></div>
+</div>
+
+<footer class="foot2">
+  <span>FoundIt &middot; a smarter lost and found for campus. Demo data is saved in this browser only.</span>
+  <label class="adm"><input type="checkbox" id="admin" style="width:auto"> Admin mode</label>
+</footer>
+
+<div class="modal" id="m-post"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pt">
+  <h2 id="pt"></h2>
+  <p class="hint" id="pd"></p>
+  <label for="f-title">What is it?</label><input id="f-title" maxlength="60" placeholder="Black leather wallet">
+  <div class="row">
+    <div><label for="f-cat">Category</label><select id="f-cat"></select></div>
+    <div><label for="f-loc">Location</label><select id="f-loc"></select></div>
+  </div>
+  <div class="row">
+    <div><label for="f-date">Date</label><input id="f-date" type="date"></div>
+    <div><label for="f-color">Main colour</label><select id="f-color"></select></div>
+  </div>
+  <label for="f-photo">Photos (up to 3, camera or gallery)</label><input id="f-photo" type="file" accept="image/*" multiple>
+  <div id="f-prev" class="prev"></div>
+  <div id="f-hwrap"><label for="f-hold">Where is it now?</label><select id="f-hold"></select></div>
+  <label id="f-uwrap" style="display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" id="f-urgent" style="width:auto"> Urgent (an ID card, or something needed for an exam)</label>
+  <label for="f-desc">Details</label><textarea id="f-desc" rows="2" placeholder="Colour, brand, anything that helps"></textarea>
+  <div id="f-vwrap">
+    <label for="f-vq">Verification question</label><input id="f-vq" maxlength="80" placeholder="Which card is in the front slot?">
+    <p class="hint">Keep the answer to yourself. Only the real owner will know it.</p>
+  </div>
+  <label for="f-contact">Your contact (hidden until you approve a claim)</label><input id="f-contact" placeholder="Phone or room number">
+  <div id="f-err" class="err" role="alert"></div>
+  <div class="foot"><button class="btn ghost" data-close>Cancel</button><button class="btn" id="f-save">Post</button></div>
+</div></div>
+
+<div class="modal" id="m-view"><div class="sheet detail" role="dialog" aria-modal="true" id="v-body"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+var CATS={"Electronics":"🔌","Stationery":"✏️","ID & Cards":"🪪","Wallet":"👛","Keys":"🔑","Bags":"🎒","Books & Notes":"📚","Clothing":"🧥","Bottles & Lunchbox":"🧴","Accessories":"⌚","Sports Gear":"🏏","Other":"📦"};
+var CATN=Object.keys(CATS);
+var LOCS=["Atrium","Audi","Chamber of Secrets","Academic Block","Admin Block","NCH","Mess","Nescafe","Other"];
+var HOLD=["With me","Admin Block office","Security desk"];
+var COLORS=["Black","White","Grey","Blue","Red","Green","Yellow","Brown","Multicolour","Not sure"];
+var KEY="foundit-v2",DAY=86400000,tab="all",postType="lost",pend=[];
+var db={items:[],myClaims:{}};
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function iso(d){return new Date(Date.now()-d*DAY).toISOString().slice(0,10)}
+function toast(t){var e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove("on")},2600)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){toast("Storage is full. Use fewer or smaller photos.")}}
+function mk(id,type,title,category,location,d,color,desc,vq,hold,urgent,contact,status){return{id:id,type:type,title:title,category:category,location:location,date:iso(d),color:color,desc:desc,vq:vq,photos:[],hold:hold,urgent:urgent,contact:contact,status:status||"open",mine:false,claims:[],created:Date.now()-d*DAY}}
+function seed(){db={seeded:1,myClaims:{},items:[
+ mk("s1","found","Black wireless earbuds case","Electronics","Atrium",1,"Black","Found on the steps near the Atrium.","What sticker is on the case?","Security desk",false,"Security desk, ask for the Atrium find"),
+ mk("s2","found","Brown leather wallet","Wallet","Nescafe",2,"Brown","Left on a table at Nescafe.","Which card is in the front slot?","With me",false,"Room 214, Hostel"),
+ mk("s3","lost","Student ID card","ID & Cards","Academic Block",0,"White","Needed for the exam this week.","","",true,"Room 108, Hostel"),
+ mk("s4","found","Blue steel water bottle","Bottles & Lunchbox","Mess",3,"Blue","Dented near the bottom.","What is written on the lid?","Admin Block office",false,"Admin Block office"),
+ mk("s5","lost","Casio scientific calculator","Stationery","Audi",2,"Black","Lost after the morning lecture.","","",false,"Room 322, Hostel"),
+ mk("s6","found","Room key with red keychain","Keys","NCH",1,"Red","Three keys on one ring.","How many keys are on the ring?","With me",false,"Room 410, Hostel"),
+ mk("s7","found","Grey hoodie","Clothing","Chamber of Secrets",9,"Grey","Returned to its owner.","","With me",false,"Room 105, Hostel","returned")]};save()}
+function load(){try{var s=localStorage.getItem(KEY);if(s)db=JSON.parse(s)}catch(e){}if(!db.items||(!db.items.length&&!db.seeded))seed()}
+function expired(it){return it.status==="open"&&Date.now()-it.created>30*DAY}
+function state(it){return expired(it)?"archived":it.status}
+function score(l,f){var s=0;if(l.category===f.category)s+=35;if(l.location===f.location)s+=25;
+ var g=Math.abs(new Date(l.date)-new Date(f.date));if(g<=2*DAY)s+=15;else if(g<=5*DAY)s+=8;
+ if(l.color&&l.color===f.color&&l.color!=="Not sure")s+=15;
+ var w=l.title.toLowerCase().split(/\s+/).filter(function(x){return x.length>2});
+ if(w.some(function(x){return f.title.toLowerCase().indexOf(x)>-1}))s+=10;return Math.min(s,100)}
+function matches(it){var o=it.type==="lost"?"found":"lost";
+ return db.items.filter(function(x){return x.type===o&&state(x)==="open"}).map(function(x){return{it:x,s:it.type==="lost"?score(it,x):score(x,it)}})
+ .filter(function(m){return m.s>=50}).sort(function(a,b){return b.s-a.s})}
+function find(id){return db.items.filter(function(i){return i.id===id})[0]}
+function visible(it){var st=state(it),q=$("q").value.trim().toLowerCase(),c=$("fcat").value,l=$("floc").value;
+ if(c&&it.category!==c)return false;if(l&&it.location!==l)return false;
+ if(q&&(it.title+" "+it.desc+" "+it.category+" "+it.location+" "+it.color).toLowerCase().indexOf(q)<0)return false;
+ if(tab==="done")return st==="returned"||st==="archived";
+ if(st==="returned"||st==="archived")return false;
+ if(tab==="lost"||tab==="found")return it.type===tab;
+ if(tab==="mine")return it.mine||!!db.myClaims[it.id];return true}
+function stats(){var a=db.items,ol=a.filter(function(i){return i.type==="lost"&&state(i)==="open"}).length,
+ of=a.filter(function(i){return i.type==="found"&&state(i)==="open"}).length,rt=a.filter(function(i){return i.status==="returned"}).length,
+ cnt={},top="-",m=0;a.forEach(function(i){cnt[i.location]=(cnt[i.location]||0)+1;if(cnt[i.location]>m){m=cnt[i.location];top=i.location}});
+ function b(n,l){return'<div class="st"><strong>'+n+'</strong><span>'+l+'</span></div>'}
+ $("stats").innerHTML=b(ol,"Lost, still looking")+b(of,"Found, waiting for owner")+b(rt,"Returned")+b(esc(top),"Busiest spot")}
+function render(){stats();
+ var list=db.items.filter(visible).sort(function(a,b){var u=function(x){return x.urgent&&state(x)==="open"?1:0};return u(b)-u(a)||b.created-a.created});
+ $("list").innerHTML=list.length?list.map(function(it){
+  var st=state(it),hm=it.mine&&st==="open"&&matches(it).length,nc=it.mine?it.claims.filter(function(c){return c.state==="pending"}).length:0,ph=it.photos&&it.photos[0];
+  return'<button class="tag '+it.type+'" data-id="'+it.id+'"><span class="hole"></span><div class="strip"><span>'+(it.type==="lost"?"Lost":"Found")+'</span><span>'+esc(st)+'</span></div>'
+  +(ph?'<div class="pw"><img alt="" src="'+ph+'">'+(it.photos.length>1?'<span class="cnt">'+it.photos.length+' photos</span>':'')+'</div>':'<div class="ph" aria-hidden="true">'+CATS[it.category]+'</div>')
+  +'<div class="b"><h3>'+esc(it.title)+'</h3><div class="meta">'+esc(it.category)+' &middot; '+esc(it.location)+'<br>'+esc(it.color)+' &middot; '+esc(it.date)+'</div>'
+  +'<div class="pills">'+(it.urgent?'<span class="pill warn">Urgent</span>':'')+(hm?'<span class="pill match">Possible match</span>':'')+(nc?'<span class="pill warn">'+nc+' claim'+(nc>1?'s':'')+' to review</span>':'')+(it.mine?'<span class="pill">Yours</span>':'')+'</div></div></button>'}).join("")
+  :'<div class="empty" style="grid-column:1/-1">Nothing here yet. '+(tab==="done"?'Returned and archived items show up here.':'Try clearing the filters, or post an item.')+'</div>'}
+function openM(id){$(id).classList.add("on")}
+function closeM(){document.querySelectorAll(".modal").forEach(function(m){m.classList.remove("on")})}
+function opts(el,arr,first){el.innerHTML=(first?'<option value="">'+first+'</option>':'')+arr.map(function(a){return'<option>'+esc(a)+'</option>'}).join("")}
+function shrink(file,cb){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){
+ var s=Math.min(1,420/im.width),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;
+ c.getContext("2d").drawImage(im,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",.55))};im.onerror=function(){cb("")};im.src=r.result};r.readAsDataURL(file)}
+function openPost(type){postType=type;pend=[];
+ $("pt").textContent=type==="lost"?"Post a lost item":"Post a found item";
+ $("pd").textContent=type==="lost"?"We will look for matching found items as soon as you post.":"Add a question only the owner can answer. Your contact stays hidden until you approve a claim.";
+ $("f-vwrap").style.display=$("f-hwrap").style.display=type==="found"?"block":"none";$("f-uwrap").style.display=type==="lost"?"flex":"none";
+ ["f-title","f-vq","f-desc","f-contact","f-photo"].forEach(function(i){$(i).value=""});$("f-urgent").checked=false;$("f-prev").innerHTML="";
+ $("f-date").value=iso(0);$("f-err").textContent="";openM("m-post");$("f-title").focus()}
+function savePost(){var t=$("f-title").value.trim(),ct=$("f-contact").value.trim(),vq=$("f-vq").value.trim(),f=postType==="found";
+ if(!t){$("f-err").textContent="Add a short name for the item.";return}
+ if(!ct){$("f-err").textContent="Add a phone number or room number so the owner can reach you.";return}
+ if(f&&!vq){$("f-err").textContent="Add a verification question so only the real owner can claim it.";return}
+ var it={id:"i"+Date.now(),type:postType,title:t,category:$("f-cat").value,location:$("f-loc").value,date:$("f-date").value||iso(0),color:$("f-color").value,
+  desc:$("f-desc").value.trim(),vq:f?vq:"",photos:pend.slice(),hold:f?$("f-hold").value:"",urgent:!f&&$("f-urgent").checked,contact:ct,status:"open",mine:true,claims:[],created:Date.now()};
+ db.items.push(it);save();closeM();render();var m=matches(it);if(m.length)showMatches(it,m);else toast("Posted. Matches will be flagged on your card.")}
+function showMatches(it,m){
+ $("v-body").innerHTML='<h2>Possible matches</h2><p class="hint">These '+(it.type==="lost"?"found":"lost")+' posts look like your item. Open one to continue.</p>'
+ +m.map(function(x){return'<button class="tag '+x.it.type+'" data-id="'+x.it.id+'" style="margin-top:10px"><span class="hole"></span><div class="strip"><span>'+x.s+'% match</span><span>'+esc(x.it.location)+'</span></div><div class="b"><h3>'+esc(x.it.title)+'</h3><div class="meta">'+esc(x.it.category)+' &middot; '+esc(x.it.color)+' &middot; '+esc(x.it.date)+'</div></div></button>'}).join("")
+ +'<div class="foot"><button class="btn ghost" data-close>Close</button></div>';openM("m-view")}
+function openItem(id){var it=find(id),st=state(it),mc=db.myClaims[id],h="",ph=it.photos||[];
+ h+='<span class="pill '+(it.type==="lost"?"warn":"match")+'">'+(it.type==="lost"?"Lost":"Found")+' &middot; '+esc(st)+'</span>'+(it.urgent?' <span class="pill warn">Urgent</span>':'')+'<h2 style="margin-top:8px">'+esc(it.title)+'</h2>';
+ h+='<div class="meta">'+CATS[it.category]+' '+esc(it.category)+' &middot; '+esc(it.location)+' &middot; '+esc(it.color)+' &middot; '+esc(it.date)+'</div>';
+ if(ph.length)h+='<img id="mainph" alt="Photo of '+esc(it.title)+'" src="'+ph[0]+'">'+(ph.length>1?'<div class="thumbs">'+ph.map(function(p){return'<img class="th" alt="Another photo" src="'+p+'">'}).join("")+'</div>':'');
+ if(it.desc)h+='<p>'+esc(it.desc)+'</p>';
+ if(it.type==="found"&&it.hold)h+='<div class="box"><strong>Where it is now</strong><br>'+(it.hold==="With me"?'With the finder. Send a claim to get their contact.':'At the '+esc(it.hold)+'. Carry proof of ownership when you collect it.')+'</div>';
+ var reveal=it.mine||(mc&&mc.state==="approved");
+ h+='<div class="box"><strong>Contact</strong><br>'+(reveal?esc(it.contact):'Hidden until the poster approves your claim.')+'</div>';
+ var share='https://wa.me/?text='+encodeURIComponent('FoundIt: '+(it.type==="lost"?'LOST':'FOUND')+' '+it.title+' ('+it.color+') at '+it.location+', '+it.date+'. '+location.href);
+ var shareBtn='<a class="btn ghost sm" target="_blank" rel="noopener" href="'+share+'">Share on WhatsApp</a>';
+ if(it.mine){
+  if(it.claims.length)h+='<h3 style="margin-top:16px;font-size:18px">Claims</h3>'+it.claims.map(function(c,i){
+   return'<div class="box"><div class="meta">Question: '+esc(it.vq)+'</div><div>Answer: <strong>'+esc(c.answer)+'</strong></div><div class="meta">Claimer: '+esc(c.contact)+'</div>'
+   +(c.state==="pending"?'<div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm found" data-approve="'+it.id+':'+i+'">Approve</button><button class="btn sm ghost" data-reject="'+it.id+':'+i+'">Reject</button></div>':'<span class="pill">'+c.state+'</span>')+'</div>'}).join("");
+  var m=st==="open"?matches(it):[];
+  if(m.length)h+='<h3 style="margin-top:16px;font-size:18px">Possible matches</h3>'+m.map(function(x){return'<button class="btn ghost sm" data-id="'+x.it.id+'" style="margin:6px 6px 0 0">'+x.s+'% &middot; '+esc(x.it.title)+'</button>'}).join("");
+  h+='<div class="foot">'+shareBtn+'<button class="btn ghost sm" style="color:var(--bad)" data-del="'+it.id+'">Delete post</button>'+(st==="open"||st==="claimed"?'<button class="btn found" data-return="'+it.id+'">Mark as returned</button>':'')+'<button class="btn ghost" data-close>Close</button></div>';
+ }else{
+  if(it.type==="found"&&st==="open"&&!mc)h+='<div class="box"><strong>Is this yours?</strong><div class="meta" style="margin:4px 0">'+esc(it.vq)+'</div>'
+   +'<input id="c-ans" placeholder="Your answer"><input id="c-con" placeholder="Your phone or room number" style="margin-top:8px"><div id="c-err" class="err" role="alert"></div>'
+   +'<button class="btn" style="margin-top:10px" data-claim="'+it.id+'">Send claim</button></div>';
+  else if(mc)h+='<div class="box">Your claim is <strong>'+mc.state+'</strong>.'+(mc.state==="approved"?' Contact the poster using the details above.':'')+'</div>';
+  else if(it.type==="lost")h+='<div class="box">Found this item? Choose "I found something" and the owner is matched automatically.</div>';
+  h+='<div class="foot">'+shareBtn+($("admin").checked?'<button class="btn ghost sm" style="color:var(--bad)" data-del="'+it.id+'">Remove post</button>':'')+'<button class="btn ghost" data-close>Close</button></div>';
+ }
+ $("v-body").innerHTML=h;openM("m-view")}
+document.addEventListener("click",function(e){
+ var th=e.target.closest(".th");if(th){$("mainph").src=th.src;return}
+ var t=e.target.closest("button");if(!t)return;
+ if(t.dataset.close!==undefined){closeM();return}
+ if(t.dataset.post){openPost(t.dataset.post);return}
+ if(t.dataset.tab){tab=t.dataset.tab;document.querySelectorAll(".tab").forEach(function(b){b.setAttribute("aria-selected",b===t)});render();return}
+ if(t.dataset.id){openItem(t.dataset.id);return}
+ if(t.dataset.claim){var a=$("c-ans").value.trim(),c=$("c-con").value.trim();
+  if(!a||!c){$("c-err").textContent="Enter your answer and a contact number.";return}
+  var it=find(t.dataset.claim);it.claims.push({answer:a,contact:c,state:"pending"});db.myClaims[it.id]={state:"pending"};
+  if(it.id.charAt(0)==="s")simulate(it);save();render();openItem(it.id);toast("Claim sent");return}
+ if(t.dataset.approve||t.dataset.reject){var p=(t.dataset.approve||t.dataset.reject).split(":"),i2=find(p[0]),cl=i2.claims[+p[1]];
+  cl.state=t.dataset.approve?"approved":"rejected";if(t.dataset.approve)i2.status="claimed";
+  save();render();openItem(i2.id);toast(cl.state==="approved"?"Approved. The claimer can now see your contact.":"Claim rejected");return}
+ if(t.dataset.return){find(t.dataset.return).status="returned";save();closeM();render();toast("Marked as returned. Nice work.");return}
+ if(t.dataset.del){db.items=db.items.filter(function(i){return i.id!==t.dataset.del});save();closeM();render();toast("Post deleted")}
+});
+function simulate(it){setTimeout(function(){var c=it.claims[it.claims.length-1];if(c&&c.state==="pending"){c.state="approved";db.myClaims[it.id]={state:"approved"};save();render();toast("Demo: the finder approved your claim")}},4000)}
+$("f-photo").addEventListener("change",function(){pend=[];$("f-prev").innerHTML="";
+ Array.prototype.slice.call(this.files,0,3).forEach(function(f){shrink(f,function(d){if(d){pend.push(d);$("f-prev").innerHTML+='<img alt="Selected photo" src="'+d+'">'}})})});
+document.querySelectorAll(".modal").forEach(function(m){m.addEventListener("click",function(e){if(e.target===m)closeM()})});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeM()});
+$("f-save").addEventListener("click",savePost);
+["q","fcat","floc"].forEach(function(i){$(i).addEventListener("input",render)});
+$("admin").addEventListener("change",render);
+opts($("f-cat"),CATN);opts($("f-loc"),LOCS);opts($("f-color"),COLORS);opts($("f-hold"),HOLD);opts($("fcat"),CATN,"All categories");opts($("floc"),LOCS,"All locations");
+function setTheme(t){document.documentElement.setAttribute("data-theme",t);$("theme").textContent=t==="dark"?"Light mode":"Dark mode";try{localStorage.setItem("foundit-theme",t)}catch(e){}}
+var th="dark";try{th=localStorage.getItem("foundit-theme")||"dark"}catch(e){}
+setTheme(th);
+$("theme").addEventListener("click",function(){setTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark")});
+load();render();
+})();
+</script>
+</body>
+</html>
